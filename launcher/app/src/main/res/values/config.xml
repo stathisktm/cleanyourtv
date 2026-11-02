@@ -229,6 +229,11 @@
         <!-- TCL remote, TV/guide button: scancode 365 = TCL_EPG (4001), then com.tcl.tv turns it into GUIDE (172).
              Opens Live TV's program guide, as the Google TV home did. -->
         <item>172:com.tcl.tv/com.tcl.dtv.manage.newguide.activity.EpgActivity</item>
+        <!-- The IR remote's TV/guide button itself (scancode 365), taken before TCL's GlobalKeyService, which while Live
+             TV is in front asks the disabled Google TV home for the guide: anywhere else it opens Live TV, in Live TV
+             it opens the program guide - what it did with the stock home. -->
+        <item>scan:365:com.tcl.tv</item>
+        <item>front:scan:365:com.tcl.tv/com.tcl.dtv.manage.newguide.activity.EpgActivity</item>
         <!-- YouTube button opens SmartTube: IR remote scancode 569 (TCL_YOUTUBE); TCL Bluetooth remotes send 4065 -->
         <item>scan:569:org.smarttube.stable</item>
         <item>4065:org.smarttube.stable</item>
