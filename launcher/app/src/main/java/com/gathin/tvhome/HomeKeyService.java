@@ -238,12 +238,19 @@ public class HomeKeyService extends AccessibilityService {
         }
     }
 
-    /** A tap's target: the "front:" entry while the button's own app is already in front, else the usual one. */
+    /**
+     * A tap's target: the "front:" entry while the button's own app is already in front, else the usual one.
+     * A "front:...:pass" entry returns null, so the key goes on to the app in front untouched: on TCL Google TV
+     * the TV app opens its own program guide from the guide button, and only needs Home to bring it up elsewhere.
+     */
     private String inFront(Map<Integer, String> keys, Map<Integer, String> front, int code) {
         String target = keys.get(code);
         String alt = front.get(code);
-        return alt != null && RemoteKeys.inFront(target, frontPackage) ? alt : target;
+        if (alt == null || !RemoteKeys.inFront(target, frontPackage)) return target;
+        return PASS.equals(alt) ? null : alt;
     }
+
+    private static final String PASS = "pass";
 
     private boolean isSettingsKey(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_SETTINGS) return true;

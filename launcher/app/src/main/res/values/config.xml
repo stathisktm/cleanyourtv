@@ -223,8 +223,9 @@
          for what a tap does while the button's own app is already in front (HOME_KEY_SERVICE=1), and use
          "guide:<package>" as a target to open that Live TV app's program guide: "172:com.vt.tv.tvcenter" with
          "front:172:guide:com.vt.tv.tvcenter" makes the Hisense hengshan Live TV button open Live TV, then its guide,
-         where the firmware hands KEYCODE_GUIDE (172) to the stock launcher and no app ever receives it. Leave empty
-         to omit. -->
+         where the firmware hands KEYCODE_GUIDE (172) to the stock launcher and no app ever receives it. "pass" as a
+         "front:" target lets the key through to the app in front, e.g. "front:scan:365:pass" on a TCL Google TV whose
+         TV app opens its own guide. Leave empty to omit. -->
     <string-array name="app_keys" translatable="false">
         <!-- TCL remote, TV/guide button: scancode 365 = TCL_EPG (4001), then com.tcl.tv turns it into GUIDE (172).
              Opens Live TV's program guide, as the Google TV home did. -->
