@@ -225,7 +225,8 @@
          "front:172:guide:com.vt.tv.tvcenter" makes the Hisense hengshan Live TV button open Live TV, then its guide,
          where the firmware hands KEYCODE_GUIDE (172) to the stock launcher and no app ever receives it. "pass" as a
          "front:" target lets the key through to the app in front, e.g. "front:scan:365:pass" on a TCL Google TV whose
-         TV app opens its own guide. Leave empty to omit. -->
+         TV app opens its own guide. "front@<part of an activity class>:" gives a target for one screen of the app in
+         front, e.g. "front@Epg:scan:365:back" closes the guide with the same button (HomeKeyService only). Leave empty to omit. -->
     <string-array name="app_keys" translatable="false">
         <!-- TCL remote, TV/guide button: scancode 365 = TCL_EPG (4001), then com.tcl.tv turns it into GUIDE (172).
              Opens Live TV's program guide, as the Google TV home did. -->
@@ -235,6 +236,8 @@
              it opens the program guide - what it did with the stock home. -->
         <item>scan:365:com.tcl.tv</item>
         <item>front:scan:365:com.tcl.tv/com.tcl.dtv.manage.newguide.activity.EpgActivity</item>
+        <!-- …and pressed again on the guide, it closes the guide (back to Live TV), as with the stock home -->
+        <item>front@Epg:scan:365:back</item>
         <!-- YouTube button opens SmartTube: IR remote scancode 569 (TCL_YOUTUBE); TCL Bluetooth remotes send 4065 -->
         <item>scan:569:org.smarttube.stable</item>
         <item>4065:org.smarttube.stable</item>

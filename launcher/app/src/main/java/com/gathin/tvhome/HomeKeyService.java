@@ -80,6 +80,10 @@ public class HomeKeyService extends AccessibilityService {
     private Map<Integer, String> frontAppKeys = Collections.emptyMap();
     private Map<Integer, String> frontAppScancodes = Collections.emptyMap();
     private String frontPackage = "";
+    /** Class of the activity in front, for "front@<part of class name>:" entries. */
+    private String frontActivity = "";
+    /** app_keys "front@Part:key:target" entries: the target while an activity whose class name contains Part is in front. */
+    private final java.util.List<String[]> frontActivityKeys = new java.util.ArrayList<>();
     /** power_on_home_always: Home at every power-on, not only over Live TV. */
     private boolean powerOnAlways;
     /** power_on_home: re-arms after the screen turns on; null unless the key is on. */
@@ -198,7 +202,15 @@ public class HomeKeyService extends AccessibilityService {
         homeLongPressHome = config.homeLongPressHome;
         frontAppKeys = RemoteKeys.parseFrontAppKeys(config.appKeys);
         frontAppScancodes = RemoteKeys.parseFrontAppScancodes(config.appKeys);
-        boolean watchFront = !frontAppKeys.isEmpty() || !frontAppScancodes.isEmpty();
+        frontActivityKeys.clear();
+        for (String entry : config.appKeys) {
+            // "front@EpgProActivity:scan:365:back" -> {EpgProActivity, scan:365:back}
+            if (entry == null || !entry.trim().startsWith("front@")) continue;
+            String rest = entry.trim().substring(6);
+            int colon = rest.indexOf(':');
+            if (colon > 0) frontActivityKeys.add(new String[] {rest.substring(0, colon), rest.substring(colon + 1)});
+        }
+        boolean watchFront = !frontAppKeys.isEmpty() || !frontAppScancodes.isEmpty() || !frontActivityKeys.isEmpty();
         stockHome.clear();
         stockHomePackage = config.stockHomeRedirect;
         if (!config.stockHomeRedirect.isEmpty()) {
@@ -252,6 +264,19 @@ public class HomeKeyService extends AccessibilityService {
 
     private static final String PASS = "pass";
 
+    /** The "front@" target for this key while a matching activity is in front, or null. */
+    private String activityTarget(KeyEvent event) {
+        if (frontActivityKeys.isEmpty() || frontActivity.isEmpty()) return null;
+        for (String[] rule : frontActivityKeys) {
+            if (!frontActivity.contains(rule[0])) continue;
+            java.util.List<String> one = java.util.Collections.singletonList(rule[1]);
+            String target = RemoteKeys.parseAppScancodes(one).get(event.getScanCode());
+            if (target == null) target = RemoteKeys.parseAppKeys(one).get(event.getKeyCode());
+            if (target != null) return target;
+        }
+        return null;
+    }
+
     private boolean isSettingsKey(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_SETTINGS) return true;
         for (int code : settingsScancodes) if (event.getScanCode() == code) return true;
@@ -267,6 +292,9 @@ public class HomeKeyService extends AccessibilityService {
             powerOnUntil = 0;
         }
         if (consumeVolumeKeys && VolumeKeys.handle(this, event)) return true;
+        // "front@" entries: a target for one screen of the app in front (the guide, not Live TV under it).
+        String byActivity = activityTarget(event);
+        if (byActivity != null && RemoteKeys.handle(this, event, byActivity, null)) return true;
         // A scancode entry is more specific than any keycode, so it goes first.
         if (RemoteKeys.handle(this, event, inFront(appScancodes, frontAppScancodes, event.getScanCode()),
                 holdAppScancodes.get(event.getScanCode()))) return true;
@@ -311,12 +339,13 @@ public class HomeKeyService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return;
         // app_keys "front:" entries: only activities count, so a toast or the volume bar doesn't change the app in front.
-        if ((!frontAppKeys.isEmpty() || !frontAppScancodes.isEmpty())
+        if ((!frontAppKeys.isEmpty() || !frontAppScancodes.isEmpty() || !frontActivityKeys.isEmpty())
                 && event.getPackageName() != null && event.getClassName() != null) {
             try {
                 ComponentName window = new ComponentName(event.getPackageName().toString(), event.getClassName().toString());
                 getPackageManager().getActivityInfo(window, 0);
                 frontPackage = window.getPackageName();
+                frontActivity = window.getClassName();
             } catch (PackageManager.NameNotFoundException notAnActivity) {
                 // a dialog, panel or overlay: the app under it is still in front
             }
