@@ -229,6 +229,9 @@
         <!-- TCL remote, TV/guide button: scancode 365 = TCL_EPG (4001), then com.tcl.tv turns it into GUIDE (172).
              Opens Live TV's program guide, as the Google TV home did. -->
         <item>172:com.tcl.tv/com.tcl.dtv.manage.newguide.activity.EpgActivity</item>
+        <!-- YouTube button opens SmartTube: IR remote scancode 569 (TCL_YOUTUBE); TCL Bluetooth remotes send 4065 -->
+        <item>scan:569:org.smarttube.stable</item>
+        <item>4065:org.smarttube.stable</item>
     </string-array>
 
     <!-- Package of the stock launcher, for TVs whose firmware turns it back on after it was disabled. XGIMI's
