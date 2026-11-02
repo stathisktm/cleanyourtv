@@ -163,6 +163,8 @@
          evdev MSC_SCAN there, which is not always the scanCode the framework reports, so a number that takes
          nothing is no proof the press never arrived. Leave empty to omit. -->
     <integer-array name="settings_key_scancodes">
+        <!-- TCL IR remote gear button (TCL_SET), answered only by the Google TV home before -->
+        <item>561</item>
     </integer-array>
     <!-- The same by Android keycode, for buttons whose scancode is shared. TCL Google TV remotes send their
          Settings button as keycode 83 (KEYCODE_NOTIFICATION, which the stock Google TV home turned into its quick
@@ -224,6 +226,9 @@
          where the firmware hands KEYCODE_GUIDE (172) to the stock launcher and no app ever receives it. Leave empty
          to omit. -->
     <string-array name="app_keys" translatable="false">
+        <!-- TCL remote, TV/guide button: scancode 365 = TCL_EPG (4001), then com.tcl.tv turns it into GUIDE (172).
+             Opens Live TV's program guide, as the Google TV home did. -->
+        <item>172:com.tcl.tv/com.tcl.dtv.manage.newguide.activity.EpgActivity</item>
     </string-array>
 
     <!-- Package of the stock launcher, for TVs whose firmware turns it back on after it was disabled. XGIMI's
