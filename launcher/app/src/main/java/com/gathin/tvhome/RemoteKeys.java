@@ -415,6 +415,11 @@ final class RemoteKeys {
             }
             return;
         }
+        if (pkg.startsWith("view:")) {
+            // "view:<uri>": a deep link, e.g. view:app://com.tcl.tv/epg, which TCL's Live TV answers with its guide.
+            start(ctx, new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(pkg.substring(5).trim())));
+            return;
+        }
         String guide = guidePackage(pkg);
         if (guide != null) {
             // The program guide, asked for the way Android TV's Live TV apps take it: the programs directory.
