@@ -62,7 +62,7 @@ public class InputKeyService extends AccessibilityService {
 
     @Override
     protected boolean onKeyEvent(KeyEvent event) {
-        if (consumeVolumeKeys && VolumeKeys.handle(this, event)) return true;
+        if (consumeVolumeKeys && VolumeKeys.handle(this, event, Config.volumeRepeatAssist)) return true;
         // A scancode entry is more specific than any keycode, so it goes first.
         if (RemoteKeys.handle(this, event, appScancodes.get(event.getScanCode()),
                 holdAppScancodes.get(event.getScanCode()))) return true;

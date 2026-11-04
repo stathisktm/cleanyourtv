@@ -420,7 +420,15 @@ final class Config {
         return ctx.getExternalFilesDir(null);
     }
 
+    /**
+     * volume_repeat_assist (theme config.json only), with consume_volume_keys: the volume key is passed on to the
+     * firmware as usual and VolumeKeys only adds the repeat of a held key. For TCL G10 Google TV, which applies the
+     * press itself but drops its auto-repeat while a key-filtering service is bound.
+     */
+    static volatile boolean volumeRepeatAssist;
+
     static Config load(Context ctx) {
+        volumeRepeatAssist = false;
         Resources res = ctx.getResources();
         List<String> dock = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.dock_apps)));
         boolean fillDock = res.getBoolean(R.bool.fill_dock);
@@ -608,6 +616,7 @@ final class Config {
             keyFilter = bool(json, "key_filter", keyFilter);
             gamepadPassthrough = bool(json, "gamepad_passthrough", gamepadPassthrough);
             consumeVolumeKeys = bool(json, "consume_volume_keys", consumeVolumeKeys);
+            volumeRepeatAssist = bool(json, "volume_repeat_assist", false);
             powerOnHome = bool(json, "power_on_home", powerOnHome);
             homeLongPressHome = bool(json, "home_long_press_home", homeLongPressHome);
             powerOnHomeAlways = bool(json, "power_on_home_always", powerOnHomeAlways);

@@ -291,7 +291,7 @@ public class HomeKeyService extends AccessibilityService {
                 && event.getKeyCode() != KeyEvent.KEYCODE_POWER && event.getKeyCode() != KeyEvent.KEYCODE_WAKEUP) {
             powerOnUntil = 0;
         }
-        if (consumeVolumeKeys && VolumeKeys.handle(this, event)) return true;
+        if (consumeVolumeKeys && VolumeKeys.handle(this, event, Config.volumeRepeatAssist)) return true;
         // "front@" entries: a target for one screen of the app in front (the guide, not Live TV under it).
         String byActivity = activityTarget(event);
         if (byActivity != null && RemoteKeys.handle(this, event, byActivity, null)) return true;

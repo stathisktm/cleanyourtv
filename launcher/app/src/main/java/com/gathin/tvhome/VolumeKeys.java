@@ -40,13 +40,32 @@ final class VolumeKeys {
 
     /** Swallows a volume key (true) and repeats it while held; any other key is left alone (false). */
     static boolean handle(Context context, KeyEvent event) {
+        return handle(context, event, false);
+    }
+
+    /**
+     * With {@code assist} the key is never swallowed: the firmware still applies every press itself, and only the
+     * repeat of a held key is added here (see Config.volumeRepeatAssist).
+     */
+    static boolean handle(Context context, KeyEvent event, boolean assist) {
         int direction = direction(event.getKeyCode());
         if (direction == 0) return false;
+        if (assist) {
+            if (!changesPress(event.getAction(), event.getRepeatCount())) return false;
+            stop();
+            if (event.getAction() == KeyEvent.ACTION_DOWN) startRepeat(context, direction);
+            return false;
+        }
         if (!changesPress(event.getAction(), event.getRepeatCount())) return true;
         stop();
         if (event.getAction() != KeyEvent.ACTION_DOWN) return true;
+        startRepeat(context, direction);
+        return true;
+    }
+
+    private static void startRepeat(Context context, int direction) {
         AudioManager audio = context.getSystemService(AudioManager.class);
-        if (audio == null) return true;
+        if (audio == null) return;
         if (handler == null) handler = new Handler(Looper.getMainLooper());
         step = new Runnable() {
             @Override
@@ -56,7 +75,6 @@ final class VolumeKeys {
             }
         };
         handler.postDelayed(step, REPEAT_DELAY_MS);
-        return true;
     }
 
     /** Ends a repeat in progress, e.g. when the service goes away while a key is held. */
