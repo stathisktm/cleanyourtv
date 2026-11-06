@@ -69,6 +69,8 @@ public class HomeKeyService extends AccessibilityService {
     private BroadcastReceiver unlockReceiver;
     /** The stock launcher's HOME activities (stock_home_redirect), disabled ones included. */
     private final Set<String> stockHome = new HashSet<>();
+    /** app_redirect: the package the firmware opens, and the one opened instead. */
+    private String redirectFrom = "", redirectTo = "";
     /** stock_home_redirect, the stock launcher's package. */
     private String stockHomePackage = "";
     /** power_on_home: the Live TV package to send back to Home, empty when off; armed until this uptime or a key. */
@@ -235,7 +237,11 @@ public class HomeKeyService extends AccessibilityService {
         }
         // home_key_service.xml subscribes to no events, so the redirects ask for window changes only when one is on.
         AccessibilityServiceInfo info = getServiceInfo();
-        if (info != null && (!stockHome.isEmpty() || !powerOnLiveTv.isEmpty() || watchFront)) {
+        int eq = Config.appRedirect.indexOf('=');
+        redirectFrom = eq > 0 ? Config.appRedirect.substring(0, eq).trim() : "";
+        redirectTo = eq > 0 ? Config.appRedirect.substring(eq + 1).trim() : "";
+        if (redirectFrom.equals(redirectTo)) redirectFrom = "";
+        if (info != null && (!stockHome.isEmpty() || !powerOnLiveTv.isEmpty() || watchFront || !redirectFrom.isEmpty())) {
             info.eventTypes |= AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
             setServiceInfo(info);
         }
@@ -353,6 +359,12 @@ public class HomeKeyService extends AccessibilityService {
         // power_on_home: the firmware opened Live TV by itself at power-on, before anyone pressed a key.
         if (powerOnRedirect(powerOnLiveTv, event.getPackageName(), SystemClock.elapsedRealtime(), powerOnUntil)) {
             openHome();
+            return;
+        }
+        // app_redirect: a remote button hard-wired to one app (YouTube) opened it; open the chosen app instead.
+        if (!redirectFrom.isEmpty() && event.getPackageName() != null
+                && redirectFrom.contentEquals(event.getPackageName())) {
+            RemoteKeys.launch(this, redirectTo);
             return;
         }
         // stock_home_redirect: the firmware turned the stock launcher back on and its home screen came up.

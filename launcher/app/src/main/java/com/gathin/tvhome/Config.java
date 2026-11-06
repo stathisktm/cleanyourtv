@@ -427,8 +427,15 @@ final class Config {
      */
     static volatile boolean volumeRepeatAssist;
 
+    /**
+     * app_redirect (theme config.json only), "from.package=to.package": when the firmware opens the first app (a
+     * remote button hard-wired to it), HomeKeyService opens the second one instead, without filtering any key.
+     */
+    static volatile String appRedirect = "";
+
     static Config load(Context ctx) {
         volumeRepeatAssist = false;
+        appRedirect = "";
         Resources res = ctx.getResources();
         List<String> dock = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.dock_apps)));
         boolean fillDock = res.getBoolean(R.bool.fill_dock);
@@ -617,6 +624,7 @@ final class Config {
             gamepadPassthrough = bool(json, "gamepad_passthrough", gamepadPassthrough);
             consumeVolumeKeys = bool(json, "consume_volume_keys", consumeVolumeKeys);
             volumeRepeatAssist = bool(json, "volume_repeat_assist", false);
+            appRedirect = string(json, "app_redirect", "").trim();
             powerOnHome = bool(json, "power_on_home", powerOnHome);
             homeLongPressHome = bool(json, "home_long_press_home", homeLongPressHome);
             powerOnHomeAlways = bool(json, "power_on_home_always", powerOnHomeAlways);
